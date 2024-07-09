@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-
 import unittest
 import sqlite3
-from src.create_tables import create_connection, create_tables, add_trip, add_person, add_trip_details, delete_trip, get_trips
+from crate_tables import create_connection, create_tables, add_trip, add_person, add_person_to_trip, add_trip_details, delete_trip, get_trips
 
 class TestDatabaseFunctions(unittest.TestCase):
 
@@ -21,11 +20,19 @@ class TestDatabaseFunctions(unittest.TestCase):
         self.assertIsNotNone(trip_id)
 
     def test_add_person(self):
-        trip = ('Trip to Paris', 'France', 1200.00, '2023-06-01', '2023-06-10')
-        trip_id = add_trip(self.conn, trip)
-        person = ('John Doe', trip_id, 30, '1234567890')
+        person = ('John Doe', 30, '1234567890')
         person_id = add_person(self.conn, person)
         self.assertIsNotNone(person_id)
+
+    def test_add_person_to_trip(self):
+        trip = ('Trip to Paris', 'France', 1200.00, '2023-06-01', '2023-06-10')
+        trip_id = add_trip(self.conn, trip)
+        person = ('John Doe', 30, '1234567890')
+        person_id = add_person(self.conn, person)
+        add_person_to_trip(self.conn, person_id, trip_id)
+        cur = self.conn.cursor()
+        cur.execute("SELECT * FROM PeopleTrips WHERE person_id=? AND trip_id=?", (person_id, trip_id))
+        self.assertIsNotNone(cur.fetchone())
 
     def test_add_trip_details(self):
         trip = ('Trip to Paris', 'France', 1200.00, '2023-06-01', '2023-06-10')
@@ -49,4 +56,5 @@ class TestDatabaseFunctions(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
 
